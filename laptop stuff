@@ -1,0 +1,72 @@
+import numpy as np      # Work with matrices
+
+
+#goal_state = [[1,2,3],[4,5,6],[7,8,0]]      # 0 is the blank space
+# Create Goal State
+goal_state = np.zeros((3,3),int)
+value = 1
+for i in range (0,3):
+    for j in range(0,3):
+        if (i < 2 or j < 2):
+            goal_state[i][j] = value
+        else:
+            goal_state[i][j] = 0
+        value = value + 1
+print(goal_state)
+
+class Tree:
+    # Constructor. The 8-puzzle can have up to 3 children
+    def __init__(self,state,r,c,left=None,mid=None,right=None):
+        self.state = state      # States will be the array of the board
+        self.left = left
+        self.mid = mid
+        self.right = right
+        self.r = r              # location of blank space via rows
+        self.c = c              # location of blank space via columns
+
+    # Return the value at that node (i.e. 1,2,3...,or 0)
+    def __str__(self):
+        return str(self.state)
+
+    def __goal__(self):
+        if (self.state == goal_state):
+            return True
+
+
+def display(tree):
+    print(tree)
+
+'''
+            123
+            450
+            786
+
+120         123        123
+453         405        456
+786         786        780
+
+'''
+
+ori = np.zeros((3,3),int)
+display(ori)
+
+fleft = Tree([[1,2,0],[4,5,3],[7,8,6]],0,2)     # Left child
+display(fleft)
+fmid = Tree([[1,2,3],[4,5,0],[7,8,6]],1,2)      # Middle child
+fright = Tree([[1,2,3],[4,5,6],[7,8,0]],2,2)    # right child
+
+hello = Tree([[1,2,3],[4,5,0],[7,8,6]],1,2,fleft, fmid, fright)    # Create a Tree object
+print(str(hello))   # Print the value at the tree
+display(hello)
+
+
+# Using FIFO Queue
+def Uniform_Cost_Search(tree):
+    if (tree.state == goal_state):
+        print("Found the state")
+        return True
+    # Create the children states. Then call UCS on children
+    # Throw each on the queue
+    # Pop one off the queue. Check if equal to goal state
+    # If not equal, expand children. Throw on queue
+    # Repeat steps 3-4 until nothing is on the queue.
