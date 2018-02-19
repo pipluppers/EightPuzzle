@@ -71,6 +71,7 @@ def expand(node, i, j):
         start_node = np.copy(node)
     return list_nodes
 
+#   Return the row and column of the blank space
 def blank_space(node):
     for i in range(0,3):
         for j in range(0,3):
@@ -82,6 +83,8 @@ def blank_space(node):
 def Uniform_Cost_Search(node):
     max_queue_size = 1
     depth = 1
+    num_expanded_nodes = 0
+
     # Create the queue and test the compare the inputted node with the goal_state
     #   because there is no do-while loop in python
     nodes = queue.Queue()
@@ -90,9 +93,8 @@ def Uniform_Cost_Search(node):
         print("Found the state")
         print("MAX QUEUE SIZE: ", max_queue_size, "\n")
         print("DEPTH: ", depth, "\n")
+        print("NUMBER OF EXPANDED NODES: ", num_expanded_nodes, "\n")
         return True
-    else:
-        print("Not correct yet")
 
     # Add nodes to list of nodes that we've seen
     print("Adding to list of seen nodes:")
@@ -109,6 +111,7 @@ def Uniform_Cost_Search(node):
         max_queue_size = nodes.qsize()
 
     supplementaryqueuesize = 0
+    num_expanded_nodes = 1
     #print("SIZE OF QUEUE: ", nodes.qsize())
     while(nodes.qsize() != 0 and max_queue_size < 26000):
 
@@ -126,6 +129,7 @@ def Uniform_Cost_Search(node):
             print("Found the state")
             print("MAX QUEUE SIZE: ", max_queue_size, "\n")
             print("DEPTH: ", depth, "\n")
+            print("NUMBER OF EXPANDED NODES: ", num_expanded_nodes, "\n")
             return True
         #else:
         #    print("Not the goal state")
@@ -134,6 +138,8 @@ def Uniform_Cost_Search(node):
         #print("Printing list of seen nodes:\n")
         #for i in range(0, len(encountered_nodes)):
         #    print(encountered_nodes[i])
+
+        num_expanded_nodes = num_expanded_nodes + 1
 
         expanded_nodes = expand(curr_node, blank_space(curr_node)[0], blank_space(curr_node)[1])
         #print("Checking if we've seen one of the expanded nodes before")
@@ -164,6 +170,7 @@ def Uniform_Cost_Search(node):
     print("Failure")
     print("MAX QUEUE SIZE: ", max_queue_size, "\n")
     print("DEPTH: ", depth, "\n")
+    print("NUMBER OF EXPANDED NODES: ", num_expanded_nodes, "\n")
     return false
 
     # Create the children states. Then call UCS on children
@@ -272,5 +279,4 @@ impossible[2][2] = 0
 print("\n\nTesting Board")
 #print(Misplaced_Tile(tmp))
 print("\nTesting Uniform Cost Search")
-Uniform_Cost_Search(ohboy)
-
+Uniform_Cost_Search(doable)
