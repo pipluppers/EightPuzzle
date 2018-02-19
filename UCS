@@ -1,0 +1,276 @@
+import numpy as np      # Work with matrices
+
+#   Queue module
+#       queue.Queue(maxsize = 0) is FIFO
+#       queue.LifoQueue(maxsize = 0) is LIFO
+#       queue.PriorityQueue(maxsize = 0) returns lowest number first
+#           pop the lowest heuristic value
+#           maybe use this one for the 2 heursitics
+import queue
+
+# goal_state = [[1,2,3],[4,5,6],[7,8,0]]      # 0 is the blank space
+# Create Goal State
+goal_state = np.zeros((3,3),int)
+value = 1
+for i in range (0,3):
+    for j in range(0,3):
+        if (i < 2 or j < 2):
+            goal_state[i][j] = value
+        else:
+            goal_state[i][j] = 0
+        value = value + 1
+print(goal_state)
+
+'''
+function general_search(problem, QUEUEING_FUNCTION):
+    nodes = make_queue(make_node(problem.INITIAL_STATE)
+    do
+        if empty(nodes):
+            return failure
+        node = REMOVE_FRONT(nodes)
+        if (problem.GOAL_TEST(node.STATE) == true)
+            return success and the node
+        nodes = QUEUEING_FUNCTION(nodes, EXPAND(node, problem.OPERATORS))
+    end
+
+'''
+
+# Expand the nodes. i and j are the indexes of the blank space
+def expand(node, i, j):
+    list_nodes = []
+    start_node = np.copy(node) # Have to do this away. If used equal, it refers to same object
+
+    if (i > 0):
+        #print("First expanded node")
+        start_node[i][j] = node[i-1][j]
+        start_node[i-1][j] = 0
+        #print(start_node)
+        list_nodes.append(start_node)
+        start_node = np.copy(node)
+    if (i < 2):
+        #print("Second expanded node")
+        start_node[i][j] = node[i+1][j]
+        start_node[i+1][j] = 0
+        #print(start_node)
+        list_nodes.append(start_node)
+        start_node = np.copy(node)
+
+    if (j > 0):
+        #print("Third expanded node")
+        start_node[i][j] = node[i][j-1]
+        start_node[i][j-1] = 0
+        #print(start_node)
+        list_nodes.append(start_node)
+        start_node = np.copy(node)
+    if (j < 2):
+        #print("Fourth expanded node")
+        start_node[i][j] = node[i][j+1]
+        start_node[i][j+1] = 0
+        #print(start_node)
+        list_nodes.append(start_node)
+        start_node = np.copy(node)
+    return list_nodes
+
+def blank_space(node):
+    for i in range(0,3):
+        for j in range(0,3):
+            if (node[i][j] == 0):
+                return (i,j)
+
+# Infinite capacity
+# Using FIFO Queue
+def Uniform_Cost_Search(node):
+    max_queue_size = 1
+    depth = 1
+    # Create the queue and test the compare the inputted node with the goal_state
+    #   because there is no do-while loop in python
+    nodes = queue.Queue()
+    encountered_nodes = []
+    if (np.array_equal(node,goal_state)):
+        print("Found the state")
+        print("MAX QUEUE SIZE: ", max_queue_size, "\n")
+        print("DEPTH: ", depth, "\n")
+        return True
+    else:
+        print("Not correct yet")
+
+    # Add nodes to list of nodes that we've seen
+    print("Adding to list of seen nodes:")
+    encountered_nodes.append(node)
+    for i in range(0, len(encountered_nodes)):
+        print(encountered_nodes[i])
+
+    # Check if we've seen the expanded node already (shouldn't happen in first step)
+    expanded_nodes = expand(node, blank_space(node)[0], blank_space(node)[1])
+    for i in range(0,len(expanded_nodes)):
+        nodes.put(expanded_nodes[i])
+
+    if (nodes.qsize() > max_queue_size):
+        max_queue_size = nodes.qsize()
+
+    supplementaryqueuesize = 0
+    #print("SIZE OF QUEUE: ", nodes.qsize())
+    while(nodes.qsize() != 0 and max_queue_size < 26000):
+
+        # Get the number of nodes per level. Increase the depth if we're on a new level
+        if (supplementaryqueuesize == 0):
+            supplementaryqueuesize = nodes.qsize() - 1
+            depth = depth + 1
+        else:
+            supplementaryqueuesize = supplementaryqueuesize - 1
+
+        # Dequeue the next node (since FIFO, its the one that came in first)
+        curr_node = nodes.get()
+        #print("Checking this node:\n", curr_node, "\n")
+        if (np.array_equal(curr_node, goal_state)):
+            print("Found the state")
+            print("MAX QUEUE SIZE: ", max_queue_size, "\n")
+            print("DEPTH: ", depth, "\n")
+            return True
+        #else:
+        #    print("Not the goal state")
+        #print("Adding to list of seen nodes")
+        encountered_nodes.append(curr_node)
+        #print("Printing list of seen nodes:\n")
+        #for i in range(0, len(encountered_nodes)):
+        #    print(encountered_nodes[i])
+
+        expanded_nodes = expand(curr_node, blank_space(curr_node)[0], blank_space(curr_node)[1])
+        #print("Checking if we've seen one of the expanded nodes before")
+        #print(len(expanded_nodes), "\n", len(encountered_nodes), "\n\n")
+        for i in range(0, len(expanded_nodes)):
+            #print("Checking this expanded node: \n", expanded_nodes[i],"\n\n")
+            seen = False
+            for j in range(0, len(encountered_nodes)):
+                if (np.array_equal(expanded_nodes[i], encountered_nodes[j])):
+                    #print("Never seen this node yet. Enqueueing it so we can expand it later")
+                    #nodes.put(expanded_nodes[i])
+                    #print("Seen this node before. Don't expand")
+                    seen = True
+                #else:
+                    #print("Seen this node before.\n", expanded_nodes[i], " Not going to expand it")
+            if (seen == False):
+                #print("Never seen this node before. Enqueuing it")
+                nodes.put(expanded_nodes[i])
+            #else:
+                #print("Seen this node before. Don't expand")
+        if (nodes.qsize() > max_queue_size):
+            max_queue_size = nodes.qsize()
+        print("SIZE OF QUEUE: ", nodes.qsize(), "\n\n")
+
+
+    # If we exited the for loop, that means the size of the queue is zero, and we have not
+    #   found the goal state. Therefore, return failure
+    print("Failure")
+    print("MAX QUEUE SIZE: ", max_queue_size, "\n")
+    print("DEPTH: ", depth, "\n")
+    return false
+
+    # Create the children states. Then call UCS on children
+    # Throw each on the queue
+    # Pop one off the queue. Check if equal to goal state
+    # If not equal, expand children. Throw on queue
+    # Repeat steps 3-4 until nothing is on the queue.
+    # If the end is reach without finding goal state, return false
+
+# Calculates the number of tiles
+# Ignores placement of blank tile
+def Misplaced_Tile(tree):
+    count = 0
+    for i in range(0,3):
+        for j in range(0,3):
+            if( (tree[i][j] != goal_state[i][j]) and tree[i][j] != 0):
+                count = count + 1
+    return count
+
+'''
+1 4 3     1 2 3
+2 5 7     4 5 6
+6 8       7 8
+'''
+
+random_state = np.zeros((3,3),int)
+random_state[0][0] = 1
+random_state[0][1] = 1
+random_state[0][2] = 1
+random_state[1][0] = 0
+random_state[1][1] = 0
+random_state[1][2] = 0
+random_state[2][0] = 0
+random_state[2][1] = 0
+random_state[2][2] = 0
+print(random_state)
+print(Misplaced_Tile(random_state))
+
+trivial = np.zeros((3,3),int)
+trivial[0][0] = 1
+trivial[0][1] = 2
+trivial[0][2] = 3
+trivial[1][0] = 4
+trivial[1][1] = 5
+trivial[1][2] = 6
+trivial[2][0] = 7
+trivial[2][1] = 8
+trivial[2][2] = 0
+
+veryez = np.zeros((3,3),int)
+veryez[0][0] = 1
+veryez[0][1] = 2
+veryez[0][2] = 3
+veryez[1][0] = 4
+veryez[1][1] = 5
+veryez[1][2] = 6
+veryez[2][0] = 7
+veryez[2][1] = 0
+veryez[2][2] = 8
+
+easy = np.zeros((3,3),int)
+easy[0][0] = 1
+easy[0][1] = 2
+easy[0][2] = 0
+easy[1][0] = 4
+easy[1][1] = 5
+easy[1][2] = 3
+easy[2][0] = 7
+easy[2][1] = 8
+easy[2][2] = 6
+
+doable = np.zeros((3,3),int)
+doable[0][0] = 0
+doable[0][1] = 1
+doable[0][2] = 2
+doable[1][0] = 4
+doable[1][1] = 5
+doable[1][2] = 3
+doable[2][0] = 7
+doable[2][1] = 8
+doable[2][2] = 6
+
+ohboy = np.zeros((3,3),int)
+ohboy[0][0] = 8
+ohboy[0][1] = 7
+ohboy[0][2] = 1
+ohboy[1][0] = 6
+ohboy[1][1] = 0
+ohboy[1][2] = 2
+ohboy[2][0] = 5
+ohboy[2][1] = 4
+ohboy[2][2] = 3
+
+impossible = np.zeros((3,3),int)
+impossible[0][0] = 1
+impossible[0][1] = 2
+impossible[0][2] = 3
+impossible[1][0] = 4
+impossible[1][1] = 5
+impossible[1][2] = 6
+impossible[2][0] = 8
+impossible[2][1] = 7
+impossible[2][2] = 0
+
+
+print("\n\nTesting Board")
+#print(Misplaced_Tile(tmp))
+print("\nTesting Uniform Cost Search")
+Uniform_Cost_Search(ohboy)
+
