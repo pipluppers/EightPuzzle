@@ -1,6 +1,37 @@
 import numpy as np      # Work with matrices
 
+#   n x n board
 n = 3
+
+trivial = np.zeros((3, 3), int)
+trivial[0][0] = 1; trivial[0][1] = 2; trivial[0][2] = 3
+trivial[1][0] = 4; trivial[1][1] = 5; trivial[1][2] = 6
+trivial[2][0] = 7; trivial[2][1] = 8; trivial[2][2] = 0
+
+veryez = np.zeros((3, 3), int)
+veryez[0][0] = 1; veryez[0][1] = 2; veryez[0][2] = 3
+veryez[1][0] = 4; veryez[1][1] = 5; veryez[1][2] = 6
+veryez[2][0] = 7; veryez[2][1] = 0; veryez[2][2] = 8
+
+easy = np.zeros((3, 3), int)
+easy[0][0] = 1; easy[0][1] = 2; easy[0][2] = 0
+easy[1][0] = 4; easy[1][1] = 5; easy[1][2] = 3
+easy[2][0] = 7; easy[2][1] = 8; easy[2][2] = 6
+
+doable = np.zeros((3, 3), int)
+doable[0][0] = 0; doable[0][1] = 1; doable[0][2] = 2
+doable[1][0] = 4; doable[1][1] = 5; doable[1][2] = 3
+doable[2][0] = 7; doable[2][1] = 8; doable[2][2] = 6
+
+ohboy = np.zeros((3, 3), int)
+ohboy[0][0] = 8; ohboy[0][1] = 7; ohboy[0][2] = 1
+ohboy[1][0] = 6; ohboy[1][1] = 0; ohboy[1][2] = 2
+ohboy[2][0] = 5; ohboy[2][1] = 4; ohboy[2][2] = 3
+
+impossible = np.zeros((3, 3), int)
+impossible[0][0] = 1; impossible[0][1] = 2; impossible[0][2] = 3
+impossible[1][0] = 4; impossible[1][1] = 5; impossible[1][2] = 6
+impossible[2][0] = 8; impossible[2][1] = 7; impossible[2][2] = 0
 
 # goal_state = [[1,2,3],[4,5,6],[7,8,0]]      # 0 is the blank space
 # Create Goal State
@@ -14,19 +45,43 @@ for i in range (0,n):
             goal_state[i][j] = 0
         value = value + 1
 
-'''
-function general_search(problem, QUEUEING_FUNCTION):
-    nodes = make_queue(make_node(problem.INITIAL_STATE)
-    do
-        if empty(nodes):
-            return failure
-        node = REMOVE_FRONT(nodes)
-        if (problem.GOAL_TEST(node.STATE) == true)
-            return success and the node
-        nodes = QUEUEING_FUNCTION(nodes, EXPAND(node, problem.OPERATORS))
-    end
+def main():
+    arr = np.zeros((n,n), int)
+    type_of_puzzle = input('Welcome to Alex Nguyen\'s 8-puzzle solver.\nType "1" to use a '
+                'default puzzle, or "2" to enter your own puzzle.\n')
+    if type_of_puzzle == '1':
+        print("CRY")
+    if type_of_puzzle == '2':
+        print("\tEnter your puzzle, use a zero to represent the blank")
+        top = input('\tEnter the first row, use a space or tabs between numbers:  ').split()
+        mid = input('\tEnter the second row, use a space or tabs between numbers: ').split()
+        bot = input('\tEnter the third row, use a space or tabs between numbers:  ').split()
+        combine = [top, mid, bot]
+        for i in range(0, len(arr)):
+            for j in range(0, len(arr)):
+                arr[i][j] = combine[i][j]
 
-'''
+    #   Should already have the puzzle board at this point
+    print('\n\tEnter your choice of algorithm:')
+    type_of_algo = input('\t\t1. Uniform Cost Search.\n\t\t2. A* with the Misplaced Tile '
+                'heuristic.\n\t\t3. A* with the Manhatten distance heuristic\n\n\t\t')
+    if type_of_algo == '1':
+        heuristic = UUCS
+    if type_of_algo == '2':
+        heuristic = misplaced_tile
+    if type_of_algo == '3':
+        heuristic = manhatten
+
+    #   Final Board Node with g(n) and h(n)
+    board = [arr, 0, heuristic(arr)]
+    print(board)
+
+    print('\nExpanding state: ')
+    print('\t\t', board[0][0], '\n\t\t', board[0][1], '\n\t\t', board[0][2])
+
+    print('\nTesting Puzzle')
+    blah = [np.copy(doable), 1, manhatten(doable)]
+    print(search(blah, manhatten))
 
 #   Return the row and column of the blank space
 def blank_space(node):
@@ -35,41 +90,12 @@ def blank_space(node):
             if node[i][j] == 0:
                 return (i,j)
 
-trivial = np.zeros((3,3),int)
-trivial[0][0] = 1; trivial[0][1] = 2; trivial[0][2] = 3
-trivial[1][0] = 4; trivial[1][1] = 5; trivial[1][2] = 6
-trivial[2][0] = 7; trivial[2][1] = 8; trivial[2][2] = 0
-
-veryez = np.zeros((3,3),int)
-veryez[0][0] = 1; veryez[0][1] = 2; veryez[0][2] = 3
-veryez[1][0] = 4; veryez[1][1] = 5; veryez[1][2] = 6
-veryez[2][0] = 7; veryez[2][1] = 0; veryez[2][2] = 8
-
-easy = np.zeros((3,3),int)
-easy[0][0] = 1; easy[0][1] = 2; easy[0][2] = 0
-easy[1][0] = 4; easy[1][1] = 5; easy[1][2] = 3
-easy[2][0] = 7; easy[2][1] = 8; easy[2][2] = 6
-
-doable = np.zeros((3,3),int)
-doable[0][0] = 0; doable[0][1] = 1; doable[0][2] = 2
-doable[1][0] = 4; doable[1][1] = 5; doable[1][2] = 3
-doable[2][0] = 7; doable[2][1] = 8; doable[2][2] = 6
-
-ohboy = np.zeros((3,3),int)
-ohboy[0][0] = 8; ohboy[0][1] = 7; ohboy[0][2] = 1
-ohboy[1][0] = 6; ohboy[1][1] = 0; ohboy[1][2] = 2
-ohboy[2][0] = 5; ohboy[2][1] = 4; ohboy[2][2] = 3
-
-impossible = np.zeros((3,3),int)
-impossible[0][0] = 1; impossible[0][1] = 2; impossible[0][2] = 3
-impossible[1][0] = 4; impossible[1][1] = 5; impossible[1][2] = 6
-impossible[2][0] = 8; impossible[2][1] = 7; impossible[2][2] = 0
-
+#   ---------------------------------   Heuristics  ---------------------------------
 def UUCS(node):
     return 0
 
-# Calculates the number of tiles
-# Ignores placement of blank tile
+#   Calculates the number of incorrect locations
+#   Ignores placement of blank tile
 def misplaced_tile(node):
     count = 0
     for i in range(0,n):
@@ -78,6 +104,7 @@ def misplaced_tile(node):
                 count = count + 1
     return count
 
+#   Distance the misplaced tile is from its required location
 def manhatten(node):
     count = 0
     for i in range(0,n):
@@ -88,16 +115,14 @@ def manhatten(node):
                 tmp = node[i][j]
                 while tmp - n > 0:
                     goal_i = goal_i + 1
-                    tmp = tmp - 3
+                    tmp = tmp - n
                 goal_j = tmp - 1
                 count = count + abs(goal_i - i) + abs(goal_j - j)
     return count
+#   --------------------------------------------------------------------------------
 
-def addToQueue(nodes, node, depth, heuristic):
-    a = depth + 1
-    b = heuristic(node)
-    nodes.append(node, a, b)
-
+#   Input: node, depth, heuristic, row of blank space, column of blank space
+#   Output: list of expanded nodes
 def expand(actualnode, node, i, j):
     list_nodes = []
     start_node = np.copy(node) # Have to do this away. If used equal, it refers to same object
@@ -133,8 +158,6 @@ def apply_depth_and_heuristic(expanded_nodes, heuristic):
         j[i][2] = heuristic(expanded_nodes[i][0])  # Apply heuristic to node
     return j
 
-
-#   Check if size of nodes_expanded is greater than zero before calling this
 #   Inserts the node into the queue in a sorted order
 def add_to_queue(nodes_queue, nodes_expanded, encountered_nodes, nodes_not_seen, heuristic):
     unseen_nodes = []
@@ -168,6 +191,8 @@ def add_to_queue(nodes_queue, nodes_expanded, encountered_nodes, nodes_not_seen,
                     nodes_queue.append(tmp)
     return nodes_queue, unseen_nodes, encountered_nodes, nodes_not_seen
 
+#   General Search Algorithm. Works for any search
+#   Input heuristic will be different depending on uniform cost search, misplaced tile, or Manhatten
 def search(node, heuristic):
     nodes = []                  # Make queue
     encountered_nodes = []      # Nodes we've seen before. Don't bother expanding
@@ -197,7 +222,7 @@ def search(node, heuristic):
     max_queue_size = len(nodes)
 
     print("Expanding state\n", node[0])
-    while len(nodes) > 0:
+    while len(nodes) > 0 and max_queue_size < 30000:
         checking = nodes.pop(0)            # Remove the first element in the queue
         if np.array_equal(checking[0], goal_state):
             print("Goal!!\n")
@@ -215,7 +240,7 @@ def search(node, heuristic):
         if max_queue_size < len(nodes):
             max_queue_size = len(nodes)
 
-        #print("MAX QUEUE SIZE: %d" % max_queue_size)
+        print("MAX QUEUE SIZE: %d" % max_queue_size)
         num_expanded_nodes = num_expanded_nodes + nodes_not_seen
         #print("NUM_EXPANDED NODES: %d" % num_expanded_nodes)
 
@@ -231,20 +256,6 @@ def search(node, heuristic):
     print("Expanded %d nodes" % num_expanded_nodes)
     print("The maximum number of nodes in the queue at any one time was %d." % max_queue_size)
 
-
-print('\nTesting Puzzle')
-blah = [np.copy(impossible), 1, manhatten(impossible)]
-print(search(blah, manhatten))
-
-
-'''
-example = np.zeros((3,3),int)
-example[0][0] = 1; example[0][1] = 2; example[0][2] = 3
-example[1][0] = 4; example[1][1] = 8; example[1][2] = 0
-example[2][0] = 7; example[2][1] = 6; example[2][2] = 5
-
-exam = [np.copy(example), 1, manhatten(example)]
-
-print("\n\n\n\n\n")
-print(search(exam, manhatten))
-'''
+#   Run main
+if __name__ == "__main__":
+    main()
