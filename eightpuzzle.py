@@ -35,7 +35,7 @@ impossible[2][0] = 8; impossible[2][1] = 7; impossible[2][2] = 0
 
 # goal_state = [[1,2,3],[4,5,6],[7,8,0]]      # 0 is the blank space
 # Create Goal State
-goal_state = np.zeros((3,3),int)
+goal_state = np.zeros((n,n),int)
 value = 1
 for i in range (0,n):
     for j in range(0,n):
@@ -74,14 +74,8 @@ def main():
 
     #   Final Board Node with g(n) and h(n)
     board = [arr, 0, heuristic(arr)]
-    print(board)
-
-    print('\nExpanding state: ')
-    print('\t\t', board[0][0], '\n\t\t', board[0][1], '\n\t\t', board[0][2])
-
-    print('\nTesting Puzzle')
-    blah = [np.copy(doable), 1, manhatten(doable)]
-    print(search(blah, manhatten))
+    #print(board)
+    search(board, heuristic)
 
 #   Return the row and column of the blank space
 def blank_space(node):
@@ -89,6 +83,19 @@ def blank_space(node):
         for j in range(0,n):
             if node[i][j] == 0:
                 return (i,j)
+
+def print_state(node, firstCall):
+    for i in range(0, len(node)):
+        print('\t\t', end='')
+        for j in range(0, len(node)):
+            if node[i][j] == 0:
+                print('b', end=' ')
+            else:
+                print(node[i][j], end=' ')
+        if not firstCall:
+            if i == len(node) - 1:
+                print('\tExpanding this node...')
+        print('\n', end='')
 
 #   ---------------------------------   Heuristics  ---------------------------------
 def UUCS(node):
@@ -200,6 +207,7 @@ def search(node, heuristic):
     #   Performance Metrics
     num_expanded_nodes = 0
     nodes_not_seen = 0  # used to increment num_expanded_nodes
+    firstCall = True    # used for the printing of the nodes (aesthetics)
 
     #   Check if first node is the goal state
     if np.array_equal(node[0], goal_state):
@@ -221,9 +229,14 @@ def search(node, heuristic):
     num_expanded_nodes = num_expanded_nodes + nodes_not_seen
     max_queue_size = len(nodes)
 
-    print("Expanding state\n", node[0])
+    print('\nExpanding state: ')
+    print_state(node[0], firstCall)
+    firstCall = False               # No longer the first call to print_state
+    print(end='\n')
+
     while len(nodes) > 0 and max_queue_size < 30000:
         checking = nodes.pop(0)            # Remove the first element in the queue
+
         if np.array_equal(checking[0], goal_state):
             print("Goal!!\n")
             print("To solve this problem, the search algorithm expanded a total of %d nodes." %
@@ -232,6 +245,11 @@ def search(node, heuristic):
                   "was %d." % max_queue_size)
             print("The depth of the goal node was %d." % checking[1])
             return checking[0]
+
+        print('The best state to expand with a g(n) = %d and h(n) = %d' %
+              (checking[1], checking[2]))
+        print_state(checking[0], firstCall)
+
         encountered_nodes.append(checking)
         expanded_nodes = expand(checking, checking[0], blank_space(checking[0])[0],
                                  blank_space(checking[0])[1])
@@ -240,7 +258,7 @@ def search(node, heuristic):
         if max_queue_size < len(nodes):
             max_queue_size = len(nodes)
 
-        print("MAX QUEUE SIZE: %d" % max_queue_size)
+        #print("MAX QUEUE SIZE: %d" % max_queue_size)
         num_expanded_nodes = num_expanded_nodes + nodes_not_seen
         #print("NUM_EXPANDED NODES: %d" % num_expanded_nodes)
 
