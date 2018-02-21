@@ -1,8 +1,7 @@
 import numpy as np      # Work with matrices
-
 #   n x n board
 n = 3
-
+#   Example Boards
 trivial = np.zeros((3, 3), int)
 trivial[0][0] = 1; trivial[0][1] = 2; trivial[0][2] = 3
 trivial[1][0] = 4; trivial[1][1] = 5; trivial[1][2] = 6
@@ -39,7 +38,7 @@ goal_state = np.zeros((n,n),int)
 value = 1
 for i in range (0,n):
     for j in range(0,n):
-        if i < 2 or j < 2:
+        if i < n-1 or j < n-1:
             goal_state[i][j] = value
         else:
             goal_state[i][j] = 0
@@ -50,13 +49,30 @@ def main():
     type_of_puzzle = input('Welcome to Alex Nguyen\'s 8-puzzle solver.\nType "1" to use a '
                 'default puzzle, or "2" to enter your own puzzle.\n')
     if type_of_puzzle == '1':
-        print("CRY")
+        default_choice = input("Choose a difficulty 1 (easiest) - 5 (hardest) "
+                               "or 6 (impossible): \n")
+        if default_choice == '1':
+            arr = np.copy(trivial)
+        elif default_choice == '2':
+            arr = np.copy(veryez)
+        elif default_choice == '3':
+            arr = np.copy(easy)
+        elif default_choice == '4':
+            arr = np.copy(doable)
+        elif default_choice == '5':
+            arr = np.copy(ohboy)
+        elif default_choice == 6:
+            arr = np.copy(impossible)
     if type_of_puzzle == '2':
         print("\tEnter your puzzle, use a zero to represent the blank")
         top = input('\tEnter the first row, use a space or tabs between numbers:  ').split()
         mid = input('\tEnter the second row, use a space or tabs between numbers: ').split()
         bot = input('\tEnter the third row, use a space or tabs between numbers:  ').split()
         combine = [top, mid, bot]
+        #   Next loop is used if n > 3 (aka a 15 puzzle or 24 puzzle)
+        for x in range(3,n):
+            top = input('\tEnter the next row, use a space or tabs between numbers:  ').split()
+            combine.append(top)
         for i in range(0, len(arr)):
             for j in range(0, len(arr)):
                 arr[i][j] = combine[i][j]
@@ -70,20 +86,20 @@ def main():
     if type_of_algo == '2':
         heuristic = misplaced_tile
     if type_of_algo == '3':
-        heuristic = manhatten
+        heuristic = manhattan
 
-    #   Final Board Node with g(n) and h(n)
+    #   Final Board Node with g(n) as second index and h(n) as third index
     board = [arr, 0, heuristic(arr)]
-    #print(board)
     search(board, heuristic)
 
-#   Return the row and column of the blank space
+#   Return the row and column of the blank space. Used in expand()
 def blank_space(node):
     for i in range(0,n):
         for j in range(0,n):
             if node[i][j] == 0:
                 return (i,j)
 
+#   Display function
 def print_state(node, firstCall):
     for i in range(0, len(node)):
         print('\t\t', end='')
@@ -112,7 +128,7 @@ def misplaced_tile(node):
     return count
 
 #   Distance the misplaced tile is from its required location
-def manhatten(node):
+def manhattan(node):
     count = 0
     for i in range(0,n):
         for j in range(0,n):
@@ -134,6 +150,7 @@ def expand(actualnode, node, i, j):
     list_nodes = []
     start_node = np.copy(node) # Have to do this away. If used equal, it refers to same object
 
+    #   Check possible children
     if i < n -1:
         start_node[i][j] = node[i+1][j]
         start_node[i+1][j] = 0
@@ -198,8 +215,9 @@ def add_to_queue(nodes_queue, nodes_expanded, encountered_nodes, nodes_not_seen,
                     nodes_queue.append(tmp)
     return nodes_queue, unseen_nodes, encountered_nodes, nodes_not_seen
 
-#   General Search Algorithm. Works for any search
-#   Input heuristic will be different depending on uniform cost search, misplaced tile, or Manhatten
+#   General Search Algorithm A*. Works for any search
+#   Input heuristic will be different depending on uniform cost search,
+#       misplaced tile, or Manhatten
 def search(node, heuristic):
     nodes = []                  # Make queue
     encountered_nodes = []      # Nodes we've seen before. Don't bother expanding
@@ -234,7 +252,7 @@ def search(node, heuristic):
     firstCall = False               # No longer the first call to print_state
     print(end='\n')
 
-    while len(nodes) > 0 and max_queue_size < 30000:
+    while len(nodes) > 0 and max_queue_size < 50000:
         checking = nodes.pop(0)            # Remove the first element in the queue
 
         if np.array_equal(checking[0], goal_state):
@@ -262,14 +280,6 @@ def search(node, heuristic):
         num_expanded_nodes = num_expanded_nodes + nodes_not_seen
         #print("NUM_EXPANDED NODES: %d" % num_expanded_nodes)
 
-        # TESTING
-        '''
-        print(len(nodes), "--------------------------------------------------")
-        for i in range(0, len(nodes)):
-            print(nodes[i][0])
-            print("g(n) + h(n) = %d + %d = %d" %
-                  (nodes[i][1], nodes[i][2], (nodes[i][1]+ nodes[i][2])))
-        '''
     print("Failure to find the solution\n")
     print("Expanded %d nodes" % num_expanded_nodes)
     print("The maximum number of nodes in the queue at any one time was %d." % max_queue_size)
