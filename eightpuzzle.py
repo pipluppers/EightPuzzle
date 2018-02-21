@@ -146,6 +146,7 @@ def manhattan(node):
 
 #   Input: node, depth, heuristic, row of blank space, column of blank space
 #   Output: list of expanded nodes
+#   Expands the children of the node
 def expand(actualnode, node, i, j):
     list_nodes = []
     start_node = np.copy(node) # Have to do this away. If used equal, it refers to same object
