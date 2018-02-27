@@ -1,5 +1,7 @@
 # Search algorithm to solve the 8-puzzle
 
+### Thanks to Dr. Eamonn Keogh for providing and overseeing this project.
+
 Run the following commands to play the puzzle:
 ```
 make
