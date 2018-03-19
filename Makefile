@@ -1,7 +1,5 @@
-CC = python
-
 start:  eightpuzzle.py
-  $(CC) eightpuzzle.py -o start
+  python eightpuzzle.py -o start
 
 clean:
-  \rm start *.o
+  \rm -rf start *.o
